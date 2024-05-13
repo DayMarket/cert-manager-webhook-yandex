@@ -25,14 +25,44 @@ rules:
       - 'secrets'
     verbs:
       - 'get'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "cert-manager-webhook-yandex.fullname" . }}:flowcontrol-reader
+  labels:
+    app: {{ include "cert-manager-webhook-yandex.name" . }}
+    chart: {{ include "cert-manager-webhook-yandex.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+rules:
   - apiGroups:
-      - 'flowcontrol.apiserver.k8s.io'
+      - "flowcontrol.apiserver.k8s.io"
     resources:
-      - 'flowschemas'
       - 'prioritylevelconfigurations'
+      - 'flowschemas'
     verbs:
       - 'list'
       - 'watch'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "cert-manager-webhook-yandex.fullname" . }}:flowcontrol-solver
+  labels:
+    app: {{ include "cert-manager-webhook-yandex.name" . }}
+    chart: {{ include "cert-manager-webhook-yandex.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "cert-manager-webhook-yandex.fullname" . }}:flowcontrol-solver
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: {{ include "cert-manager-webhook-yandex.fullname" . }}
+    namespace: {{ .Release.Namespace }}
 ---
 # Bind the previously created role to the webhook service account to allow reading from secrets in all namespaces
 apiVersion: rbac.authorization.k8s.io/v1
@@ -133,4 +163,4 @@ subjects:
   - apiGroup: ""
     kind: ServiceAccount
     name: {{ .Values.certManager.serviceAccountName }}
-    namespace: {{ .Values.certManager.namespace }}
+    namespace: {{ .Release.Namespace }}
