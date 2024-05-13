@@ -29,7 +29,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "cert-manager-webhook-yandex.fullname" . }}:flowcontrol-reader
+  name: {{ include "cert-manager-webhook-yandex.fullname" . }}:flowcontrol-solver
   labels:
     app: {{ include "cert-manager-webhook-yandex.name" . }}
     chart: {{ include "cert-manager-webhook-yandex.chart" . }}
@@ -37,7 +37,7 @@ metadata:
     heritage: {{ .Release.Service }}
 rules:
   - apiGroups:
-      - "flowcontrol.apiserver.k8s.io"
+      - "flowcontrol.apiserver.k8s.io/v1beta3"
     resources:
       - 'prioritylevelconfigurations'
       - 'flowschemas'
